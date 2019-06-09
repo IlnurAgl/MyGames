@@ -1,0 +1,63 @@
+#:import SlideTransition kivy.uix.screenmanager.SlideTransition
+
+
+<RoundedButton@Button>:
+    background_color: 0,0,0,0
+    canvas.before:
+        Color:
+            rgba: (.4,.4,.4,1) if self.state=='normal' else (0,.7,.7,1)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [50,]
+
+
+<MainScreen>
+	BoxLayout:
+		orientation: 'vertical'
+		padding: root.width*0.1, root.height*0.2
+		spacing: root.height*0.03
+		RoundedButton:
+			text: 'Games'
+			font_size: '50sp'
+			on_release:
+				app.root.transition = SlideTransition(direction='left')
+				root.manager.current = "GamesScreen"
+		RoundedButton:
+			text: 'Exit'
+			font_size: '50sp'
+			on_release: app.stop()
+
+
+
+<GamesScreen>
+	view: view
+	ScrollView:
+		size: self.size
+		GridLayout: # here i want a scrollview
+			padding: [root.width*0.05, root.width*0.02, root.width*0.05, 0]
+			spacing: root.height*0.03
+			id: view
+			cols: 1
+			size_hint_y: None
+			height: self.minimum_height + 3
+			Label:
+				text: 'List of games'
+				size_hint_y: None
+				color: (0, 0, 0, 1)
+				font_size: '50sp'
+			RoundedButton:
+				text: 'TicTac'
+				font_size: '45sp'
+				size_hint_y: None
+				on_release:
+					app.root.transition = SlideTransition(direction='left')
+					root.manager.current = "TicTacScreen"
+			RoundedButton:
+				text: 'Back'
+				font_size: '45sp'
+				size_hint_y: None
+				on_release:
+					app.root.transition = SlideTransition(direction='right')
+					root.manager.current = "MainScreen"
+
