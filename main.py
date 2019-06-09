@@ -96,6 +96,8 @@ class TicTacWidgetOne(TicTacWidget):
             return
 
         if self.draw():
+            for i in range(9):
+                self.button[i].disabled = True
             self.resetBtn.text = 'Draw! Restart'
             return
 
@@ -106,6 +108,8 @@ class TicTacWidgetOne(TicTacWidget):
             return
 
         if self.draw():
+            for i in range(9):
+                self.button[i].disabled = True
             self.resetBtn.text = 'Draw! Restart'
             return
 
@@ -147,7 +151,7 @@ class TicTacWidgetOne(TicTacWidget):
                     t = True
                     if not btn.text:
                         btn.text = stepAI
-                    else:
+                    elif btn.text != stepAI:
                         t = False
                         break
                 if t:
