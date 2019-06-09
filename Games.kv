@@ -52,7 +52,7 @@
 				size_hint_y: None
 				on_release:
 					app.root.transition = SlideTransition(direction='left')
-					root.manager.current = "TicTacScreen"
+					root.manager.current = "PlayersScreen"
 			RoundedButton:
 				text: 'Back'
 				font_size: '45sp'
@@ -61,3 +61,22 @@
 					app.root.transition = SlideTransition(direction='right')
 					root.manager.current = "MainScreen"
 
+
+<PlayersScreen>
+	BoxLayout:
+		orientation: 'vertical'
+		padding: [root.width*0.05, root.width*0.02, root.width*0.05, root.width*0.02]
+		spacing: root.height*0.03
+		Label:
+			text: 'Number players'
+			font_size: '45sp'
+			color: (0, 0, 0, 1)
+			size_hint: (1, 0.2)
+		RoundedButton:
+			text: 'One player'
+			font_size: '40sp'
+			on_release: root.gameOne()
+		RoundedButton:
+			text: 'Two player'
+			font_size: '40sp'
+			on_release: root.gameTwo()
