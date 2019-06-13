@@ -54,6 +54,13 @@
 					app.root.transition = SlideTransition(direction='left')
 					root.manager.current = "PlayersScreen"
 			RoundedButton:
+				text: 'Minesweeper'
+				font_size: '45sp'
+				size_hint_y: None
+				on_release:
+					app.root.transition = SlideTransition(direction='left')
+					root.manager.current = "MinesweeperScreen"
+			RoundedButton:
 				text: 'Back'
 				font_size: '45sp'
 				size_hint_y: None

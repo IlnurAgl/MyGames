@@ -6,6 +6,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.button import Button
 from kivy.properties import ObjectProperty
 from kivy.lang import Builder
+from random import choice, randint
 # imports
 
 # Window color
@@ -24,14 +25,19 @@ class TicTacWidget(BoxLayout):
     def __init__(self, **kw):
         super(TicTacWidget, self).__init__(**kw)
 
+        # edit box orientation
         self.orientation = 'vertical'
 
+        # padding
         self.padding = self.width * 0.1
 
+        # main choises
         self.choice = ['X', 'O']
 
+        # step
         self.switch = 0
 
+        # button back to the choose games
         self.backBtn = Button(
             text='Back',
             size_hint=[1, 0.1],
@@ -41,10 +47,12 @@ class TicTacWidget(BoxLayout):
 
         self.add_widget(self.backBtn)
 
+        # add field
         grid = GridLayout(cols=3)
 
         self.spacing = self.width * 0.05
 
+        # adding buttons to field
         self.button = [0 for _ in range(9)]
         for index in range(9):
             self.button[index] = Button(
@@ -56,6 +64,7 @@ class TicTacWidget(BoxLayout):
 
         self.add_widget(grid)
 
+        # add reset button
         self.resetBtn = Button(
             text="Restart",
             font_size='20sp',
@@ -165,10 +174,21 @@ class TicTacWidgetOne(TicTacWidget):
                     if not btn.text:
                         btn.text = stepAI
                         return
-        for i in [4, 0, 2, 6, 8, 1, 3, 5, 7]:
-            if not self.button[i].text:
-                self.button[i].text = stepAI
-                return
+        if any([not self.button[i].text for i in [0, 2, 6, 8]]):
+            i = choice([0, 2, 6, 8])
+            while self.button[i].text:
+                i = choice([0, 2, 6, 8])
+            self.button[i].text = stepAI
+            return
+        if not self.button[4].text:
+            self.button[4].text = stepAI
+            return
+        if any([not self.button[i].text for i in [1, 3, 5, 7]]):
+            i = choice([1, 3, 5, 7])
+            while self.button[i].text:
+                i = choice([1, 3, 5, 7])
+            self.button[i].text = stepAI
+            return
 
     # function to restart game
     def restart(self, arg):
@@ -259,6 +279,7 @@ class TicTacScreen(Screen):
     def __init__(self, **kw):
         super(TicTacScreen, self).__init__(**kw)
 
+    # On enter the screen
     def on_enter(self):
         global players
         self.clear_widgets()
@@ -268,6 +289,208 @@ class TicTacScreen(Screen):
             self.add_widget(TicTacWidgetTwo())
 
 
+# Buttons in minesweeper game
+class MinesweeperTile(Button):
+    def __init__(self, row, col, **kw):
+        super().__init__(**kw)
+        # Is momb?
+        self.bomb = False
+        # Row coordinate
+        self.row = row
+        # Col coordinate
+        self.col = col
+
+
+# Minesweeper widget
+class MinesweeperWidget(BoxLayout):
+    def __init__(self, **kw):
+        super(MinesweeperWidget, self).__init__(**kw)
+
+        # Change orientation of BoxLayout
+        self.orientation = 'vertical'
+
+        # Count of open tiles
+        self.open = 0
+
+        self.tilesX = 10
+        self.tilesY = 10
+        self.gameStart = True
+        self.amountBombs = 10
+
+        # Button back
+        self.backBtn = Button(
+            text='Back',
+            size_hint=[1, 0.1],
+            font_size='30sp',
+            on_release=self.back,
+        )
+
+        # Field and gridlayout
+        self.field = []
+        grid = GridLayout(cols=10)
+
+        # Set all tiles
+        for i in range(self.tilesX):
+            row = []
+            for j in range(self.tilesY):
+                row.append(MinesweeperTile(
+                    i, j,
+                    on_release=self.openTile,
+                    disabled_color=(1, 0, 0, 1),
+                )
+                )
+            self.field.append(row)
+
+        # Set bombs in tiles
+        for i in range(self.amountBombs):
+            a = randint(0, self.tilesX - 1)
+            b = randint(0, self.tilesY - 1)
+            while self.field[a][b].bomb:
+                a = randint(0, self.tilesX - 1)
+                b = randint(0, self.tilesY - 1)
+            self.field[a][b].bomb = True
+
+        # Add field in grid
+        for i in self.field:
+            for j in i:
+                grid.add_widget(j)
+
+        # add reset button
+        self.resetBtn = Button(
+            text="Restart",
+            font_size='20sp',
+            size_hint=[1, .1],
+            on_release=self.restart
+        )
+
+        # Add all widgets in Layout
+        self.add_widget(self.backBtn)
+        self.add_widget(grid)
+        self.add_widget(self.resetBtn)
+
+    # function back for the button
+    def back(self, instance):
+        global screen_manager
+        screen_manager.transition = SlideTransition(direction='right')
+        screen_manager.current = 'GamesScreen'
+
+    # function restart game for the button
+    def restart(self, arg):
+        self.switch = 0
+        self.gameStart = True
+        self.resetBtn.text = 'Restart'
+        self.resetBtn.color = (1, 1, 1, 1)
+        for i in range(self.tilesX):
+            for j in range(self.tilesY):
+                self.field[i][j].color = [1, 1, 1, 1]
+                self.field[i][j].text = ""
+                self.field[i][j].bomb = False
+                self.field[i][j].disabled = False
+
+        # Set new bombs in tiles
+        for i in range(self.amountBombs):
+            a = randint(0, self.tilesX - 1)
+            b = randint(0, self.tilesY - 1)
+            while self.field[a][b].bomb:
+                a = randint(0, self.tilesX - 1)
+                b = randint(0, self.tilesY - 1)
+            self.field[a][b].bomb = True
+
+    # Open tile
+    def openTile(self, instance):
+        count = 0
+        if instance.bomb:
+            if self.gameStart:
+                instance.bomb = False
+                self.gameStart = False
+                a = randint(0, self.tilesX - 1)
+                b = randint(0, self.tilesY - 1)
+                while self.field[a][b].bomb:
+                    a = randint(0, self.tilesX - 1)
+                    b = randint(0, self.tilesY - 1)
+                self.field[a][b].bomb = True
+            else:
+                instance.text = 'bomb'
+                self.lose()
+                return
+        self.gameStart = False
+        count = self.get_neighbors_count(instance.row, instance.col)
+
+        self.open += 1
+        instance.disabled = True
+        instance.text = str(count)
+
+        if count == 0:
+            self.openNeighbors(instance.row, instance.col)
+
+        if self.open + 10 == 100:
+            self.win()
+
+    def get_neighbors_count(self, row, col):
+        count = 0
+        for i in range(row - 1, row + 2):
+            for j in range(col - 1, col + 2):
+                try:
+                    if self.field[i][j].bomb and i > -1 and j > -1:
+                        count += 1
+                except Exception:
+                    pass
+        return count
+
+    # Open Neighbors of tile
+    def openNeighbors(self, row, col):
+        for i in range(row - 1, row + 2):
+            for j in range(col - 1, col + 2):
+                if i < 0 or j < 0:
+                    continue
+                try:
+                    if self.field[i][j].disabled:
+                        continue
+                    else:
+                        count = self.get_neighbors_count(i, j)
+                        self.field[i][j].disabled = True
+                        self.field[i][j].text = str(count)
+                        self.open += 1
+                        if count == 0:
+                            self.openNeighbors(i, j)
+                except Exception:
+                    pass
+
+    # Disable all tiles
+    def openAll(self, win=False):
+        for i in range(self.tilesX):
+            for j in range(self.tilesY):
+                # Disable all tiles
+                if self.field[i][j].bomb:
+                    self.field[i][j].text = 'bomb'
+                self.field[i][j].disabled = True
+                if win:
+                    self.field[i][j].color = (0, 1, 0, 1)
+
+    # If player lose
+    def lose(self):
+        self.openAll()
+        self.resetBtn.text = 'You lose! Restart'
+        self.resetBtn.color = (1, 0, 0, 1)
+
+    # If player win
+    def win(self):
+        self.openAll(win=True)
+        self.resetBtn.text = 'You win! Restart'
+        self.resetBtn.color = (0, 1, 0, 1)
+
+
+# Minesweeper screen
+class MinesweeperScreen(Screen):
+    def __init__(self, **kw):
+        super(MinesweeperScreen, self).__init__(**kw)
+
+    def on_enter(self):
+        self.clear_widgets()
+        self.add_widget(MinesweeperWidget())
+
+
+# Screen to choose number of players
 class PlayersScreen(Screen):
     def __init__(self, **kw):
         super(PlayersScreen, self).__init__(**kw)
@@ -306,17 +529,20 @@ class MainScreen(Screen):
 screen_manager = ScreenManager()
 
 
+# App class
 class GamesApp(App):
     def build(self):
         mainScreen = MainScreen(name='MainScreen')
         ticTacScreen = TicTacScreen(name='TicTacScreen')
         gamesScreen = GamesScreen(name='GamesScreen')
         playersScreen = PlayersScreen(name='PlayersScreen')
+        minesweeperScreen = MinesweeperScreen(name='MinesweeperScreen')
 
         screen_manager.add_widget(mainScreen)
         screen_manager.add_widget(playersScreen)
         screen_manager.add_widget(ticTacScreen)
         screen_manager.add_widget(gamesScreen)
+        screen_manager.add_widget(minesweeperScreen)
 
         return screen_manager
 
